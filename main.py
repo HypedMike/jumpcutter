@@ -12,6 +12,7 @@ def getRangesList(textfile):
     timestamps = open(textfile, "r").readlines();
     results = [];
     for i in (0, len(timestamps)):
+        print(timestamps[i]);
         timing = timestamps[i].split(" ")[0];
         method = timestamps[i].split(" ")[1];
         results.append(
@@ -38,6 +39,9 @@ video = VideoFileClip(filename);
 
 subclips = [];
 actualvideo = [];
+
+print(getRangesList(textfile));
+exit();
 
 for timestamp in getRangesList(textfile):
     start, end, mode = timestamp.split(" ");
