@@ -3,6 +3,8 @@ from tkinter import *
 from tkinter.filedialog import askopenfilename
 from moviepy.editor import VideoFileClip
 
+from lib.MainVideo import MainVideo
+
 def getSeconds(timestamp):
     timestamp = timestamp.split(":");
     seconds = int(timestamp[0]) * 60 * 60 + int(timestamp[1]) * 60 + int(timestamp[2]);
@@ -24,8 +26,6 @@ def getRangesList(textfile):
     return results;
 
 
-
-
 Tk().withdraw();
 filename = askopenfilename();
 print("Selected file: " + filename);
@@ -33,29 +33,27 @@ print("Selected file: " + filename);
 textfile = askopenfilename();
 print("Selected file: " + textfile);
 
+# raw video
 video = VideoFileClip(filename);
 
+# abstract class with all the cuts
+product = MainVideo("Podcast", video);
 
-subclips = [];
-actualvideo = [];
-
+# construction of the abstract class
 for timestamp in getRangesList(textfile):
-    start, end, mode = timestamp.split(" ");
+    start, end, mode, name = timestamp.split(" ");
+    
+    if name == None or name == "":
+        name = f"Clip{start}-{end}";
+
     start = int(start);
     end = int(end);
     if(mode == "o"):
-        actualvideo.append(video.subclip(start, end));
+        product.add(video.subclip(start, end));
     elif(mode == "i"):
-        subclips.append(video.subclip(start, end));
+        product.add(video.subclip(start,  end), highlight=True, title=name);
 
 
 
 # export subclips
-n = 0;
-for sc in subclips:
-    sc.write_videofile("highlight" + str(n) + ".mp4", fps=30);
-    n = n + 1;
-
-# export main video
-finalvideo = concatenate_videoclips(actualvideo);
-finalvideo.write_videofile("finalvideo.mp4", fps=30);
+MainVideo.render(True);
