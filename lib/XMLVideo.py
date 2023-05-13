@@ -1,45 +1,54 @@
 import xml.etree.ElementTree as ET
+from moviepy.editor import VideoFileClip
 
-class XMLVideo:
-    def __init__(self, path) -> None:
-        self.root = ET.Element("xmeml");
-        self.sequence = ET.SubElement(self.root, "sequence");
-        sequence_name = ET.SubElement(self.sequence, "name");
-        self.media = ET.SubElement(self.sequence, "media");
-        self.video = ET.SubElement(self.media, "video");
-        self.track = ET.SubElement(self.video, "track");
-        sequence_name.text = "My Timeline";
-        self.path = path;
-    
-    def addSection(self, start, end, type):
-        clipitem = ET.SubElement(self.track, "clipitem");
-        clipitem.set("id", self.path);
+class Sequence:
+    def __init__(self, name: str, video: VideoFileClip) -> None:
+        self.name: str = name;
+        self.duration: int = video.duration;
 
-        duration = ET.SubElement(clipitem, "duration");
-        duration.text = str(end - start);
+        self.root =  ET.Element('sequence');
+        ET.SubElement(self.root, 'name').text = name;
+        ET.SubElement(self.root, 'duration').text = str(video.duration);
 
-        rate = ET.SubElement(clipitem, "rate");
-        rate.text = "24";
-        ntsc = ET.SubElement(clipitem, "ntsc");
-        ntsc.text = "FALSE";
-    
-        time_start = ET.SubElement(clipitem, "start");
-        time_start.text = str(start);
-    
-        time_end = ET.SubElement(clipitem, "end");
-        time_end.text = str(end);
-    
-        # file description
-        file_desc = ET.SubElement(clipitem, "file");
-        file_desc.set("id", self.path);
-    
-        pathurl = ET.SubElement(file_desc, "pathurl");
-        pathurl.text = self.path;
-    
-    def save(self):
-        tree = ET.ElementTree(self.root);
-        tree.write("seq.xmeml");
+        rate = ET.SubElement(self.root, 'rate');
+        ET.SubElement(rate, 'timebase').text = video.fps;
+        ET.SubElement(rate, 'ntsc').text = 'false';
+
+    def get(self) -> ET.Element:
+        return self.root;
+
+class ClipItem:
+    def __init__(self, video: VideoFileClip, start: int, end: int) -> None:
+        self.root =  ET.Element('track');
+        ET.SubElement(self.root, 'name').text = video.filename;
+        ET.SubElement(self.root, 'duration').text = str(video.duration);
+
+        rate = ET.SubElement(self.root, 'rate');
+        ET.SubElement(rate, 'timebase').text = video.fps;
+        ET.SubElement(rate, 'ntsc').text = 'false';
+
+        ET.SubElement(self.root, 'start').text = str(start);
+        ET.SubElement(self.root, 'end').text = str(end);
+
+        ET.SubElement(self.root, 'enabled').text = True;
+
+        file = ET.SubElement(self.root, 'file');
+        rate = ET.SubElement(file, 'rate');
+        ET.SubElement(rate, 'timebase').text = video.fps;
+        ET.SubElement(rate, 'ntsc').text = 'false';
+        ET.SubElement(file, 'duration').text = str(video.duration);
+        ET.SubElement(file, 'path').text = video.filename;
+        ET.SubElement(file, 'name').text = video.filename;
+
+        
 
 
-xml = XMLVideo("video.mp4");
-xml.save();
+
+
+
+
+video = VideoFileClip('C:\\Users\\miche\\Videos\\2022-11-27 12-44-48.mkv');
+
+print(Sequence('test', video).get());
+
+
